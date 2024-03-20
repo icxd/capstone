@@ -1,2 +1,7 @@
-target/build/
-target/isodir/
+.vscode/
+target/build/*.o
+target/isodir/boot/*.bin
+target/isodir/boot/grub/grub.cfg
+target/osdev.bin
+target/osdev.iso
+target/qemu.log

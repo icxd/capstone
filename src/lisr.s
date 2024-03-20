@@ -48,10 +48,15 @@ isr_no_err_stub 29
 isr_err_stub 30
 isr_no_err_stub 31
 
+.altmacro
+.macro isr_stub number
+    .long isr_stub_\number
+.endm
+
 .globl isr_stub_table
 isr_stub_table:
-.set i, 0
-.rept 32
-    .long isr_stub_$i
-    .set i, i + 1
-.endr
+    .set i, 0
+    .rept 32
+        isr_stub %i
+        .set i, i + 1
+    .endr

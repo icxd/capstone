@@ -8,43 +8,18 @@ as --32 src/lgdt.s -o target/build/lgdt.o
 as --32 src/lidt.s -o target/build/lidt.o
 as --32 src/lisr.s -o target/build/lisr.o
 
-gcc -m32 -c src/main.c -o target/build/main.o -std=gnu99 -ffreestanding -O2 -Wall -Wextra
-gcc -m32 -c src/kernel.c -o target/build/kernel.o -std=gnu99 -ffreestanding -O2 -Wall -Wextra
-gcc -m32 -c src/vga.c -o target/build/vga.o -std=gnu99 -ffreestanding -O2 -Wall -Wextra
-gcc -m32 -c src/gdt.c -o target/build/gdt.o -std=gnu99 -ffreestanding -O2 -Wall -Wextra
-gcc -m32 -c src/idt.c -o target/build/idt.o -std=gnu99 -ffreestanding -O2 -Wall -Wextra
-gcc -m32 -c src/isr.c -o target/build/isr.o -std=gnu99 -ffreestanding -O2 -Wall -Wextra
-gcc -m32 -c src/serial.c -o target/build/serial.o -std=gnu99 -ffreestanding -O2 -Wall -Wextra
+C_FILES=$(find src -name "*.c")
+for file in $C_FILES; do
+    gcc -m32 -c $file -o target/build/$(basename $file .c).o -std=gnu99 -ffreestanding -O2 -Wall -Wextra
+done
 
-ld -m elf_i386 -T target/linker.ld -nostdlib -o target/osdev.bin \
-    target/build/boot.o \
-    target/build/lgdt.o \
-    target/build/lidt.o \
-    target/build/lisr.o \
-    target/build/main.o \
-    target/build/kernel.o \
-    target/build/vga.o \
-    target/build/gdt.o \
-    target/build/idt.o \
-    target/build/isr.o \
-    target/build/serial.o
+O_FILES=$(find target/build -name "*.o")
+ld -m elf_i386 -T target/linker.ld -nostdlib -o target/osdev.bin $O_FILES
 
 ./src/symbol_gen.sh target/osdev.bin
-gcc -m32 -c symbols.c -o target/build/symbols.o -std=gnu99 -ffreestanding -O2 -Wall -Wextra
-
-ld -m elf_i386 -T target/linker.ld -nostdlib -o target/osdev.bin \
-    target/build/boot.o \
-    target/build/lgdt.o \
-    target/build/lidt.o \
-    target/build/lisr.o \
-    target/build/main.o \
-    target/build/kernel.o \
-    target/build/vga.o \
-    target/build/gdt.o \
-    target/build/idt.o \
-    target/build/isr.o \
-    target/build/serial.o \
-    target/build/symbols.o
+gcc -m32 -c src/symbols.c -o target/build/symbols.o -std=gnu99 -ffreestanding -O2 -Wall -Wextra
+ld -m elf_i386 -T target/linker.ld -nostdlib -o target/osdev.bin $O_FILES target/build/symbols.o
+rm src/symbols.c
 
 grub-file --is-x86-multiboot target/osdev.bin
 
@@ -53,4 +28,8 @@ cp target/osdev.bin target/isodir/boot/osdev.bin
 cp target/grub.cfg target/isodir/boot/grub/grub.cfg
 grub-mkrescue -o target/osdev.iso target/isodir
 
-# qemu-system-x86_64 -cdrom target/osdev.iso
+qemu-system-x86_64 -cdrom target/osdev.iso \
+    -no-reboot -no-shutdown \
+    -serial stdio \
+    -d int \
+    -D target/qemu.log

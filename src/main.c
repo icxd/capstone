@@ -86,28 +86,12 @@ void cpuid_test() {
 void kentry() {
     gdt_init();
     idt_init();
+    serial_init();
 
     v_init(VGA_YELLOW, VGA_BLACK);
 
     10 / 0;
 
     // cpuid_test();
-
-    asm volatile("mov $12345, %eax");
-    asm volatile("int $0");
-    asm volatile("int $1");
-    asm volatile("int $2");
-    asm volatile("int $3");
-    asm volatile("int $4");
-    asm volatile("int $5");
-    asm volatile("int $6");
-    asm volatile("int $7");
-    asm volatile("int $8");
-    asm volatile("int $9");
-    asm volatile("int $10");
-    asm volatile("int $11");
-    asm volatile("int $12");
-    asm volatile("int $13");
-    asm volatile("int $14");
-    asm volatile("int $15");
+    serial_write("Hello, world!\n");
 }

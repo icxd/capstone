@@ -18,7 +18,7 @@ void serial_init() {
     outb(port + 4, 0x0f);
 }
 
-static void serial_write_char(char *ch) {
+static void serial_write_char(char ch) {
     while ((inb(SERIAL_COM1_PORT + 5) & 0x20) == 0)
         ;
     outb(SERIAL_COM1_PORT, ch);
@@ -34,4 +34,4 @@ void serial_write_error(const char *s) {
     serial_write(s);
 }
 
-void serial_set_input_masked(bool);
+void serial_set_input_masked(bool) {}
