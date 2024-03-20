@@ -1,4 +1,5 @@
 #include "include/isr.h"
+#include "include/idt.h"
 #include "include/kernel.h"
 #include "include/serial.h"
 #include "include/symbols.h"
@@ -43,8 +44,8 @@ static const char *__exception_labels[] = {
 static void print_interrupt_stacktrace(isr_frame_t *frame) {
     char utoa_buffer[67];
     serial_write("\nattempted stacktrace: interrupt during \n");
-    u32 ebp = frame->base_frame.ebp;
-    void *eip = (void *)frame->base_frame.eip;
+    u32 ebp = frame->ebp;
+    void *eip = (void *)frame->eip;
     for (;;) {
         symbol_t *symbol = null;
         for (int i = 0; __symbol_tab[i].addr != (void *)0xffffffffffffffff;
@@ -67,7 +68,7 @@ static void print_interrupt_stacktrace(isr_frame_t *frame) {
             serial_write(" <unknown>\n");
         }
 
-        if ((u32)eip != frame->base_frame.eip) ebp = *(u32 *)ebp;
+        if ((u32)eip != frame->eip) ebp = *(u32 *)ebp;
         if (ebp == 0) return;
         eip = (void *)(*(u32 *)(ebp + 8));
     }
@@ -77,49 +78,49 @@ static void dump_registers(isr_frame_t *frame) {
     char utoa_buffer[67];
 
     serial_write("\n\nprocess register dump:\n\teax:");
-    serial_write(utoa((u32)frame->general_registers.eax, utoa_buffer, 16));
+    serial_write(utoa((u32)frame->eax, utoa_buffer, 16));
     serial_write(", ebx: ");
-    serial_write(utoa((u32)frame->general_registers.ebx, utoa_buffer, 16));
+    serial_write(utoa((u32)frame->ebx, utoa_buffer, 16));
     serial_write(", ecx: ");
-    serial_write(utoa((u32)frame->general_registers.ecx, utoa_buffer, 16));
+    serial_write(utoa((u32)frame->ecx, utoa_buffer, 16));
     serial_write(", edx: ");
-    serial_write(utoa((u32)frame->general_registers.edx, utoa_buffer, 16));
+    serial_write(utoa((u32)frame->edx, utoa_buffer, 16));
     serial_write(", edi: ");
-    serial_write(utoa((u32)frame->general_registers.edi, utoa_buffer, 16));
+    serial_write(utoa((u32)frame->edi, utoa_buffer, 16));
     serial_write(", esi: ");
-    serial_write(utoa((u32)frame->general_registers.esi, utoa_buffer, 16));
-    serial_write("\n\te8: ");
-    serial_write(utoa((u32)frame->general_registers.e8, utoa_buffer, 16));
-    serial_write(", e9: ");
-    serial_write(utoa((u32)frame->general_registers.e9, utoa_buffer, 16));
-    serial_write(", e10: ");
-    serial_write(utoa((u32)frame->general_registers.e10, utoa_buffer, 16));
-    serial_write(", e11: ");
-    serial_write(utoa((u32)frame->general_registers.e11, utoa_buffer, 16));
-    serial_write("\n\te12: ");
-    serial_write(utoa((u32)frame->general_registers.e12, utoa_buffer, 16));
-    serial_write(", e13: ");
-    serial_write(utoa((u32)frame->general_registers.e13, utoa_buffer, 16));
-    serial_write(", e14: ");
-    serial_write(utoa((u32)frame->general_registers.e14, utoa_buffer, 16));
-    serial_write(", e15: ");
-    serial_write(utoa((u32)frame->general_registers.e15, utoa_buffer, 16));
-    serial_write("\n\tcr0: ");
-    serial_write(utoa((u32)frame->control_registers.cr0, utoa_buffer, 16));
-    serial_write(", cr2: ");
-    serial_write(utoa((u32)frame->control_registers.cr2, utoa_buffer, 16));
-    serial_write(", cr3: ");
-    serial_write(utoa((u32)frame->control_registers.cr3, utoa_buffer, 16));
-    serial_write(", cr4: ");
-    serial_write(utoa((u32)frame->control_registers.cr4, utoa_buffer, 16));
+    serial_write(utoa((u32)frame->esi, utoa_buffer, 16));
+    // serial_write("\n\te8: ");
+    // serial_write(utoa((u32)frame->e8, utoa_buffer, 16));
+    // serial_write(", e9: ");
+    // serial_write(utoa((u32)frame->e9, utoa_buffer, 16));
+    // serial_write(", e10: ");
+    // serial_write(utoa((u32)frame->e10, utoa_buffer, 16));
+    // serial_write(", e11: ");
+    // serial_write(utoa((u32)frame->e11, utoa_buffer, 16));
+    // serial_write("\n\te12: ");
+    // serial_write(utoa((u32)frame->e12, utoa_buffer, 16));
+    // serial_write(", e13: ");
+    // serial_write(utoa((u32)frame->e13, utoa_buffer, 16));
+    // serial_write(", e14: ");
+    // serial_write(utoa((u32)frame->e14, utoa_buffer, 16));
+    // serial_write(", e15: ");
+    // serial_write(utoa((u32)frame->e15, utoa_buffer, 16));
+    // serial_write("\n\tcr0: ");
+    // serial_write(utoa((u32)frame->cr0, utoa_buffer, 16));
+    // serial_write(", cr2: ");
+    // serial_write(utoa((u32)frame->cr2, utoa_buffer, 16));
+    // serial_write(", cr3: ");
+    // serial_write(utoa((u32)frame->cr3, utoa_buffer, 16));
+    // serial_write(", cr4: ");
+    // serial_write(utoa((u32)frame->cr4, utoa_buffer, 16));
     serial_write("\n\tesp: ");
-    serial_write(utoa((u32)frame->base_frame.esp, utoa_buffer, 16));
+    serial_write(utoa((u32)frame->esp, utoa_buffer, 16));
     serial_write(", ebp: ");
-    serial_write(utoa((u32)frame->base_frame.ebp, utoa_buffer, 16));
+    serial_write(utoa((u32)frame->ebp, utoa_buffer, 16));
     serial_write(", eflags: ");
-    serial_write(utoa((u32)frame->base_frame.eflags, utoa_buffer, 16));
+    serial_write(utoa((u32)frame->eflags, utoa_buffer, 16));
     serial_write("\n\terror code: b*");
-    serial_write(utoa((u32)frame->base_frame.error_code, utoa_buffer, 2));
+    serial_write(utoa((u32)frame->error_code, utoa_buffer, 2));
     serial_write("\n");
 }
 
@@ -152,12 +153,13 @@ NORETURN void exception_handler(isr_frame_t *);
 void exception_handler(isr_frame_t *frame) {
     serial_set_input_masked(true);
     serial_write("FATAL ");
-    serial_write(__exception_labels[frame->base_frame.vector]);
+    serial_write(__exception_labels[frame->vector]);
     serial_write(":\n");
     print_interrupt_stacktrace(frame);
     dump_registers(frame);
-    if (frame->base_frame.vector == PAGE_FAULT_CODE)
-        analyze_page_fault(frame->base_frame.error_code);
-    for (;;)
-        asm volatile("cli; hlt");
+    if (frame->vector == PAGE_FAULT_CODE) analyze_page_fault(frame->error_code);
+    for (;;) {
+        asm volatile("cli");
+        asm volatile("hlt");
+    }
 }

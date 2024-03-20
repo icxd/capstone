@@ -17,6 +17,7 @@ typedef unsigned long usz;
 
 typedef enum { false = 0, true = 1 } bool;
 
+#define ALIGNED(n) __attribute__((aligned(n)))
 #define PACKED __attribute__((packed))
 #define NORETURN __attribute__((noreturn))
 #define WEAK __attribute__((weak))

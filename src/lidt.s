@@ -5,8 +5,10 @@ idt_reload:
     push %ebp
     mov %esp, %ebp
     pushfl
-    cli
+
     lidt (%edi)
+    sti
+
     popfl
     popl %ebp
     ret

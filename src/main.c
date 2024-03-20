@@ -1,5 +1,6 @@
 #include "include/gdt.h"
 #include "include/idt.h"
+#include "include/isr.h"
 #include "include/kernel.h"
 #include "include/serial.h"
 #include "include/types.h"

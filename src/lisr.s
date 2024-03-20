@@ -1,20 +1,48 @@
 .section .text
 
-.altmacro
+.extern exception_handler
+isr_common_stub:
+    pusha
+    mov %ds, %ax
+    push %eax
+    mov $0x10, %ax
+    mov %ax, %ds
+    mov %ax, %es
+    mov %ax, %fs
+    mov %ax, %gs
+    mov %ax, %ss
+    push %esp
 
-.macro isr_err_stub number
-isr_stub_\number:
+    cld
     call exception_handler
+
+    pop %eax
+    pop %eax
+    mov %ax, %ds
+    mov %ax, %es
+    mov %ax, %fs
+    mov %ax, %gs
+    mov %ax, %ss
+    popa
+    add $8, %esp
     iret
+
+.altmacro
+.macro isr_err_stub number
+.globl isr_stub_\number
+isr_stub_\number:
+    push $\number
+    jmp isr_common_stub
 .endm
 
 .macro isr_no_err_stub number
+.globl isr_stub_\number
 isr_stub_\number:
-    call exception_handler
-    iret
+    push $0
+    push $\number
+    jmp isr_common_stub
 .endm
 
-.extern exception_handler
 isr_no_err_stub 0
 isr_no_err_stub 1
 isr_no_err_stub 2
