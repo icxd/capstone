@@ -43,7 +43,7 @@ static const char *__exception_labels[] = {
 // https://github.com/austanss/skylight/blob/trunk/glass/src/cpu/interrupts/isr.c
 static void print_interrupt_stacktrace(isr_frame_t *frame) {
     char utoa_buffer[67];
-    serial_write("\nattempted stacktrace: interrupt during \n");
+    serial_write("Attempted Stacktrace:\n");
     u32 ebp = frame->ebp;
     void *eip = (void *)frame->eip;
     for (;;) {
@@ -53,19 +53,19 @@ static void print_interrupt_stacktrace(isr_frame_t *frame) {
             if ((u32)eip != (u32)__symbol_tab[i].addr &&
                 (u32)eip < (u32)__symbol_tab[i + 1].addr) {
                 symbol = (symbol_t *)&__symbol_tab[i];
-                serial_write("\t");
+                serial_write("    \033[33m0x");
                 serial_write(utoa((u32)eip, utoa_buffer, 16));
-                serial_write(" <");
+                serial_write("\033[0m\t\t <\033[34m");
                 serial_write(symbol->name);
-                serial_write(">\n");
+                serial_write("\033[0m>\n");
                 break;
             }
         }
 
         if (symbol == null) {
-            serial_write("\t");
+            serial_write("    \033[33m0x");
             serial_write(utoa((u32)eip, utoa_buffer, 16));
-            serial_write(" <unknown>\n");
+            serial_write("\033[0m\t\t <\033[31munknown\033[0m>\n");
         }
 
         if ((u32)eip != frame->eip) ebp = *(u32 *)ebp;
@@ -77,82 +77,65 @@ static void print_interrupt_stacktrace(isr_frame_t *frame) {
 static void dump_registers(isr_frame_t *frame) {
     char utoa_buffer[67];
 
-    serial_write("\n\nprocess register dump:\n\teax:");
+    serial_write("\nProcess Register Dump:\n    EAX: \033[33m0x");
     serial_write(utoa((u32)frame->eax, utoa_buffer, 16));
-    serial_write(", ebx: ");
+    serial_write("\033[0m, EBX: \033[33m0x");
     serial_write(utoa((u32)frame->ebx, utoa_buffer, 16));
-    serial_write(", ecx: ");
+    serial_write("\033[0m, ECX: \033[33m0x");
     serial_write(utoa((u32)frame->ecx, utoa_buffer, 16));
-    serial_write(", edx: ");
+    serial_write("\033[0m, EDX: \033[33m0x");
     serial_write(utoa((u32)frame->edx, utoa_buffer, 16));
-    serial_write(", edi: ");
+    serial_write("\033[0m, EDI: \033[33m0x");
     serial_write(utoa((u32)frame->edi, utoa_buffer, 16));
-    serial_write(", esi: ");
+    serial_write("\033[0m, ESI: \033[33m0x");
     serial_write(utoa((u32)frame->esi, utoa_buffer, 16));
-    // serial_write("\n\te8: ");
-    // serial_write(utoa((u32)frame->e8, utoa_buffer, 16));
-    // serial_write(", e9: ");
-    // serial_write(utoa((u32)frame->e9, utoa_buffer, 16));
-    // serial_write(", e10: ");
-    // serial_write(utoa((u32)frame->e10, utoa_buffer, 16));
-    // serial_write(", e11: ");
-    // serial_write(utoa((u32)frame->e11, utoa_buffer, 16));
-    // serial_write("\n\te12: ");
-    // serial_write(utoa((u32)frame->e12, utoa_buffer, 16));
-    // serial_write(", e13: ");
-    // serial_write(utoa((u32)frame->e13, utoa_buffer, 16));
-    // serial_write(", e14: ");
-    // serial_write(utoa((u32)frame->e14, utoa_buffer, 16));
-    // serial_write(", e15: ");
-    // serial_write(utoa((u32)frame->e15, utoa_buffer, 16));
-    // serial_write("\n\tcr0: ");
-    // serial_write(utoa((u32)frame->cr0, utoa_buffer, 16));
-    // serial_write(", cr2: ");
-    // serial_write(utoa((u32)frame->cr2, utoa_buffer, 16));
-    // serial_write(", cr3: ");
-    // serial_write(utoa((u32)frame->cr3, utoa_buffer, 16));
-    // serial_write(", cr4: ");
-    // serial_write(utoa((u32)frame->cr4, utoa_buffer, 16));
-    serial_write("\n\tesp: ");
+    serial_write("\033[0m\n    ESP: \033[33m0x");
     serial_write(utoa((u32)frame->esp, utoa_buffer, 16));
-    serial_write(", ebp: ");
+    serial_write("\033[0m, EBP: \033[33m0x");
     serial_write(utoa((u32)frame->ebp, utoa_buffer, 16));
-    serial_write(", eflags: ");
+    serial_write("\033[0m, EFLAGS: \033[33m0x");
     serial_write(utoa((u32)frame->eflags, utoa_buffer, 16));
-    serial_write("\n\terror code: b*");
+    serial_write("\033[0m\n    Error Code: \033[33m0b");
     serial_write(utoa((u32)frame->error_code, utoa_buffer, 2));
-    serial_write("\n");
+    serial_write("\033[0m\n");
 }
 
 static void analyze_page_fault(u32 code) {
-    serial_write("\n\npage fault details:\n\tviolation: ");
-    serial_write(((code >> 0) & 1) ? "privileged" : "absent");
+    serial_write("\nPage Fault Details:\n    Violation:\t");
+    serial_write(((code >> 0) & 1) ? "\033[34mPrivileged\033[0m"
+                                   : "\033[35mAbsent\033[0m");
 
-    serial_write("\n\taccess: ");
-    serial_write(((code >> 1) & 1) ? "write" : "read");
+    serial_write("\n    Access:\t");
+    serial_write(((code >> 1) & 1) ? "\033[34mWrite\033[0m"
+                                   : "\033[35mRead\033[0m");
 
-    serial_write("\n\torigin: ");
-    serial_write(((code >> 2) & 1) ? "user" : "kernel");
+    serial_write("\n    Origin:\t");
+    serial_write(((code >> 2) & 1) ? "\033[34mUser\033[0m"
+                                   : "\033[35mKernel\033[0m");
 
-    serial_write("\n\tbad entry: ");
-    serial_write(((code >> 3) & 1) ? "true" : "false");
+    serial_write("\n    Bad Entry:\t");
+    serial_write(((code >> 3) & 1) ? "\033[32mTrue\033[0m"
+                                   : "\033[31mFalse\033[0m");
 
-    serial_write("\n\texecution: ");
-    serial_write(((code >> 4) & 1) ? "true" : "false");
+    serial_write("\n    Execution:\t");
+    serial_write(((code >> 4) & 1) ? "\033[32mTrue\033[0m"
+                                   : "\033[31mFalse\033[0m");
 
-    serial_write("\n\tpkru: ");
-    serial_write(((code >> 5) & 1) ? "true" : "false");
+    serial_write("\n    PKRU:\t");
+    serial_write(((code >> 5) & 1) ? "\033[32mTrue\033[0m"
+                                   : "\033[31mFalse\033[0m");
 
-    serial_write("\n\tshadow: ");
-    serial_write(((code >> 6) & 1) ? "true" : "false");
+    serial_write("\n    Shadow:\t");
+    serial_write(((code >> 6) & 1) ? "\033[32mTrue\033[0m"
+                                   : "\033[31mFalse\033[0m");
 }
 
 #define PAGE_FAULT_CODE 0x0e
 
-NORETURN void exception_handler(isr_frame_t *);
-void exception_handler(isr_frame_t *frame) {
+NORETURN void interrupt_handler(isr_frame_t *);
+void interrupt_handler(isr_frame_t *frame) {
     serial_set_input_masked(true);
-    serial_write("FATAL ");
+    serial_write("\033[31;1mFATAL \033[0;0m");
     serial_write(__exception_labels[frame->vector]);
     serial_write(":\n");
     print_interrupt_stacktrace(frame);

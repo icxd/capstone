@@ -1,6 +1,6 @@
 .section .text
 
-.extern exception_handler
+.extern interrupt_handler
 isr_common_stub:
     pusha
     mov %ds, %ax
@@ -14,7 +14,7 @@ isr_common_stub:
     push %esp
 
     cld
-    call exception_handler
+    call interrupt_handler 
 
     pop %eax
     pop %eax

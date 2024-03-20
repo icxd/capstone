@@ -91,8 +91,8 @@ void kentry() {
 
     v_init(VGA_YELLOW, VGA_BLACK);
 
-    10 / 0;
-
     // cpuid_test();
     serial_write("Hello, world!\n");
+
+    asm("int $0xe");
 }

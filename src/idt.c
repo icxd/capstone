@@ -6,7 +6,7 @@ static idtr_t idtr;
 static bool vectors[IDT_MAX_DESCRIPTORS];
 
 extern void *isr_stub_table[];
-extern void idt_reload(idtr_t *);
+// FIXME: extern void idt_reload(idtr_t *);
 
 void idt_init() {
     idtr.base = (u32)&idt_entries[0];
@@ -17,7 +17,8 @@ void idt_init() {
         vectors[vector] = true;
     }
 
-    idt_reload(&idtr);
+    // idt_reload(&idtr);
+    asm volatile("lidtl (%0)" : : "r"(&idtr));
 }
 
 void idt_set_gate(u8 vector, void *isr, u8 flags) {
