@@ -1,9 +1,0 @@
-{
-  "files.associations": {
-    "*.ejs": "html",
-    "*.h": "c",
-    "*.s": "gasasm",
-    "compare": "c",
-    "cstdint": "c"
-  }
-}
