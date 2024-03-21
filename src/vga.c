@@ -41,6 +41,46 @@ void v_putnl() {
     next_line_index++;
 }
 
+void v_printf(const char *fmt, ...) {
+    __builtin_va_list args;
+    __builtin_va_start(args, fmt);
+    u32 i = 0;
+    while (fmt[i]) {
+        if (fmt[i] == '%') {
+            i++;
+            switch (fmt[i]) {
+            case 'c':
+                v_putc(__builtin_va_arg(args, int));
+                break;
+            case 's':
+                v_puts(__builtin_va_arg(args, char *));
+                break;
+            case 'd':
+                v_puti(__builtin_va_arg(args, int));
+                break;
+            case 'b':
+                v_putb(__builtin_va_arg(args, u32));
+                break;
+            case 'x': {
+                char utoa_buf[32];
+                utoa(__builtin_va_arg(args, u32), utoa_buf, 16);
+                v_puts(utoa_buf);
+            } break;
+            case 'p':
+                v_puts("0x");
+                v_putb(__builtin_va_arg(args, u32));
+                break;
+            default:
+                break;
+            }
+        } else {
+            v_putc(fmt[i]);
+        }
+        i++;
+    }
+    __builtin_va_end(args);
+}
+
 void v_putc(char ch) {
     if (ch == '\n') v_putnl();
     else if (ch == '\t') {

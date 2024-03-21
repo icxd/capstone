@@ -1,4 +1,4 @@
-ENTRY(_start)
+ENTRY(_loader)
 
 SECTIONS {
     . = 0xc0100000;
@@ -13,7 +13,7 @@ SECTIONS {
     }
 
     .rodata : AT(ADDR(.rodata) - 0xc0000000) {
-        *(.rodata)
+        *(.rodata*)
         . = ALIGN(0x1000);
     }
 
@@ -25,6 +25,7 @@ SECTIONS {
     .bss : AT(ADDR(.bss) - 0xc0000000) {
         *(COMMON)
         *(.bss)
+        *(.bootstrap_stack)
         . = ALIGN(0x1000);
     }
 

@@ -3,6 +3,7 @@
 #include "include/isr.h"
 #include "include/kernel.h"
 #include "include/multiboot.h"
+#include "include/pmm.h"
 #include "include/serial.h"
 #include "include/types.h"
 #include "include/vga.h"
@@ -86,9 +87,15 @@ void cpuid_test() {
 }
 
 void kentry(usz magic, usz addr) {
+    multiboot_info_t *mbi = (multiboot_info_t *)addr;
+
+    serial_init();
     gdt_init();
     idt_init();
-    serial_init();
+
+    pmm_parse_memory_map(mbi->mmap_addr, mbi->mmap_length);
+
+    // pmm_init(mbi);
 
     v_init(VGA_YELLOW, VGA_BLACK);
 

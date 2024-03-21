@@ -35,6 +35,7 @@ u16 v_entry(u8, u8, u8);
 void v_clear_buffer(u16 **, u8, u8);
 void v_init(u8, u8);
 void v_putnl();
+void v_printf(const char *, ...);
 void v_putc(char);
 void v_puts(char *);
 void v_puti(int);
