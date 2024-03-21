@@ -21,5 +21,6 @@ typedef enum { false = 0, true = 1 } bool;
 #define PACKED __attribute__((packed))
 #define NORETURN __attribute__((noreturn))
 #define WEAK __attribute__((weak))
+#define ALWAYS_INLINE __attribute__((always_inline))
 
 #endif // !TYPES_H

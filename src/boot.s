@@ -1,5 +1,5 @@
 .set MAGIC, 0x1BADB002
-.set FLAGS, 0
+.set FLAGS, 0x00000001 | 0x00000002
 .set CHECKSUM, -(MAGIC + FLAGS)
 
 .section .multiboot
@@ -31,6 +31,9 @@ fix_cs:
     mov %ax, %ss
 
     mov $stack_top, %esp
+
+    pushl %ebx
+    pushl %eax
     call kentry
 
 hlt_loop:

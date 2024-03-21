@@ -2,6 +2,7 @@
 #include "include/idt.h"
 #include "include/isr.h"
 #include "include/kernel.h"
+#include "include/multiboot.h"
 #include "include/serial.h"
 #include "include/types.h"
 #include "include/vga.h"
@@ -84,15 +85,23 @@ void cpuid_test() {
     print_edx(edx);
 }
 
-void kentry() {
+void kentry(usz magic, usz addr) {
     gdt_init();
     idt_init();
     serial_init();
 
     v_init(VGA_YELLOW, VGA_BLACK);
 
+    char utoa_buffer[32];
+    v_puts(utoa((u32)magic, utoa_buffer, 16));
+    v_puts("\n");
+    v_puts(utoa((u32)addr, utoa_buffer, 16));
+    v_puts("\n");
+
     // cpuid_test();
     serial_write("Hello, world!\n");
 
-    asm("int $0xe");
+    v_puts("Hello, world!\n");
+
+    // asm("int $0xe");
 }
