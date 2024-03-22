@@ -29,6 +29,6 @@
 
 extern u32 kernel_phys_start, kernel_phys_end;
 extern u32 kernel_virt_start, kernel_virt_end;
-extern u32 kernel_phys_map_start, kernel_phys_map_end;
+// extern u32 kernel_phys_map_start, kernel_phys_map_end;
 
 #endif // !MEMLAYOUT_H

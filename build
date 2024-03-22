@@ -3,21 +3,21 @@ set -xe
 mkdir -p target/build
 mkdir -p target/isodir/boot/grub
 
-as --32 src/boot.s -o target/build/boot.o
-as --32 src/lgdt.s -o target/build/lgdt.o
-as --32 src/lidt.s -o target/build/lidt.o
-as --32 src/lisr.s -o target/build/lisr.o
+as --32 src/boot.s -o target/build/boot.o -g --gstabs
+as --32 src/lgdt.s -o target/build/lgdt.o -g --gstabs
+as --32 src/lidt.s -o target/build/lidt.o -g --gstabs
+as --32 src/lisr.s -o target/build/lisr.o -g --gstabs
 
 C_FILES=$(find src -name "*.c")
 for file in $C_FILES; do
-    gcc -m32 -c $file -o target/build/$(basename $file .c).o -std=gnu99 -ffreestanding -O2 -Wall -Wextra
+    gcc -m32 -c $file -o target/build/$(basename $file .c).o -std=gnu99 -ffreestanding -O2 -Wall -Wextra -g
 done
 
 O_FILES=$(find target/build -name "*.o")
 ld -m elf_i386 -T target/linker.ld -nostdlib -o target/osdev.bin $O_FILES
 
 ./src/symbol_gen.sh target/osdev.bin
-gcc -m32 -c src/symbols.c -o target/build/symbols.o -std=gnu99 -ffreestanding -O2 -Wall -Wextra
+gcc -m32 -c src/symbols.c -o target/build/symbols.o -std=gnu99 -ffreestanding -O2 -Wall -Wextra -g
 ld -m elf_i386 -T target/linker.ld -nostdlib -o target/osdev.bin $O_FILES target/build/symbols.o
 rm src/symbols.c
 
@@ -28,8 +28,17 @@ cp target/osdev.bin target/isodir/boot/osdev.bin
 cp target/grub.cfg target/isodir/boot/grub/grub.cfg
 grub-mkrescue -o target/osdev.iso target/isodir
 
-qemu-system-x86_64 -cdrom target/osdev.iso \
-    -no-reboot -no-shutdown \
-    -serial stdio \
-    -d int \
-    -D target/qemu.log
+if [[ $1 == "-d" || $1 == "--debug" ]]; then
+    objcopy --only-keep-debug target/osdev.bin target/osdev.sym
+    objcopy --strip-debug target/osdev.bin
+
+    qemu-system-x86_64 -s -S target/osdev.iso \
+        -no-reboot -no-shutdown
+else
+    qemu-system-x86_64 -cdrom target/osdev.iso \
+        -no-reboot -no-shutdown \
+        -serial stdio \
+        -d int \
+        -D target/qemu.log
+
+fi

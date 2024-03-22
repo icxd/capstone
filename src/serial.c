@@ -70,7 +70,7 @@ void s_printf(const char *fmt, ...) {
                 break;
             }
         } else {
-            v_putc(fmt[i]);
+            s_putc(fmt[i]);
         }
         i++;
     }

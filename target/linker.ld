@@ -1,34 +1,29 @@
-ENTRY(_loader)
+ENTRY(_start)
 
 SECTIONS {
-    . = 0xc0100000;
+    . = 1M;
 
     kernel_virt_start = .;
-    kernel_phys_start = . - 0xc0000000;
+    kernel_phys_start = .;
 
-    .text : AT(ADDR(.text) - 0xc0000000) {
+    .text BLOCK(4K) : ALIGN(4K) {
         *(.multiboot)
         *(.text)
-        . = ALIGN(0x1000);
     }
 
-    .rodata : AT(ADDR(.rodata) - 0xc0000000) {
-        *(.rodata*)
-        . = ALIGN(0x1000);
+    .rodata BLOCK(4K) : ALIGN(4K) {
+        *(.rodata)
     }
 
-    .data : AT(ADDR(.data) - 0xc0000000) {
+    .data BLOCK(4K) : ALIGN(4K) {
         *(.data)
-        . = ALIGN(0x1000);
     }
 
-    .bss : AT(ADDR(.bss) - 0xc0000000) {
+    .bss BLOCK(4K) : ALIGN(4K) {
         *(COMMON)
         *(.bss)
-        *(.bootstrap_stack)
-        . = ALIGN(0x1000);
     }
 
     kernel_virt_end = .;
-    kernel_phys_end = . - 0xc0000000;
+    kernel_phys_end = .;
 }

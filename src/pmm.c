@@ -1,5 +1,5 @@
 #include "include/pmm.h"
-#include "include/vga.h"
+#include "include/serial.h"
 
 u32 *phys_memory_bitmap = 0;
 usz phys_block_count = 0, phys_used_block_count = 0;
@@ -22,22 +22,24 @@ inline static void bitmap_unset(usz bit) {
 
 void pmm_parse_memory_map(multiboot_memory_map_t *addr, usz len) {
     multiboot_memory_map_t *entry = addr;
-    v_puts("Physical memory map:\n");
+    s_puts("\nPhysical memory map:");
     for (usz i = 0; i < len / sizeof(multiboot_memory_map_t); i++) {
         if ((entry + i)->type == MULTIBOOT_MEMORY_AVAILABLE) {
-            v_puts("Available: |");
+            s_puts("\n    Available: |");
             phys_available_memory_size += (entry + i)->len;
         }
-        v_printf(" addr: %x", (entry + i)->addr);
-        v_printf(" length: %x", (entry + i)->len);
+        s_printf(" addr: 0x%x", (entry + i)->addr);
+        s_printf(" length: 0x%x", (entry + i)->len);
         phys_installed_memory_size += (entry + i)->len;
     }
-    v_printf("Installed memory size: %d KiB",
+    s_puts("\n\n");
+    s_printf("Installed memory size: %d KiB",
              phys_installed_memory_size / 1024);
-    v_printf("= %d MB\n", phys_installed_memory_size / (1024 * 1024));
-    v_printf("Available memory size: %d KiB",
+    s_printf(" = %d MB\n", phys_installed_memory_size / (1024 * 1024));
+    s_printf("Available memory size: %d KiB",
              phys_available_memory_size / 1024);
-    v_printf("= %d MB\n", phys_available_memory_size / (1024 * 1024));
+    s_printf(" = %d MB\n", phys_available_memory_size / (1024 * 1024));
+    s_puts("\n");
 }
 
 bool pmm_find_free_block(usz *);

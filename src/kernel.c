@@ -35,21 +35,28 @@ void itoa(int num, char *buf) {
 }
 
 const char *utoa(u32 num, char *buf, u8 radix) {
-    u32 index = 0;
-    char x;
-    if (num == 0) {
-        buf[0] = '0';
-        buf[1] = '\0';
-    } else {
-        while (num != 0) {
-            x = num % radix;
-            if (x < 10) buf[index] = x + '0';
-            else buf[index] = x + 'A' - 10;
-            index++;
-            num = num / radix;
-        }
-        buf[index] = '\0';
+    char *str = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    char *p = buf;
+    char *p1, *p2;
+    u32 ud = num;
+    u32 divisor = radix;
+
+    do {
+        *p++ = str[ud % divisor];
+    } while (ud /= divisor);
+
+    *p = '\0';
+
+    p1 = buf;
+    p2 = p - 1;
+    while (p1 < p2) {
+        char tmp = *p1;
+        *p1 = *p2;
+        *p2 = tmp;
+        p1++;
+        p2--;
     }
+
     return buf;
 }
 

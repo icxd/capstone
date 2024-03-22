@@ -4,4 +4,6 @@
 /target/isodir/boot/grub/grub.cfg
 /target/osdev.bin
 /target/osdev.iso
+/target/osdev.sym
 /target/qemu.log
+/dgb.log
