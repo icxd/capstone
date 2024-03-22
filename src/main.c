@@ -87,16 +87,16 @@ void cpuid_test() {
 }
 
 void kentry(usz magic, usz addr) {
+    s_init();
     multiboot_info_t *mbi = (multiboot_info_t *)addr;
+    s_printf("mbi: %p\n", mbi);
 
-    serial_init();
     gdt_init();
     idt_init();
 
     pmm_parse_memory_map(mbi->mmap_addr, mbi->mmap_length);
 
     // pmm_init(mbi);
-
     v_init(VGA_YELLOW, VGA_BLACK);
 
     char utoa_buffer[32];
@@ -106,7 +106,7 @@ void kentry(usz magic, usz addr) {
     v_puts("\n");
 
     // cpuid_test();
-    serial_write("Hello, world!\n");
+    s_puts("Hello, world!\n");
 
     v_puts("Hello, world!\n");
 
