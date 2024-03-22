@@ -6,4 +6,5 @@
 /target/osdev.iso
 /target/osdev.sym
 /target/qemu.log
-/dgb.log
+
+dbg.log
