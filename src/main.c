@@ -110,5 +110,5 @@ void kentry(usz magic, usz addr) {
 
     v_puts("Hello, world!\n");
 
-    // asm("int $0xe");
+    asm("int $0xe");
 }
