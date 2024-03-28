@@ -6,5 +6,6 @@
 /target/osdev.iso
 /target/osdev.sym
 /target/qemu.log
+/.ccls-cache
 
 dbg.log

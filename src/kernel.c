@@ -60,6 +60,40 @@ const char *utoa(u32 num, char *buf, u8 radix) {
     return buf;
 }
 
+void *memcpy(void *dst, const void *src, usz n) {
+    u32 num_dwords = n / 4;
+    u32 num_bytes = n % 4;
+    u32 *dst32 = (u32 *)dst;
+    u32 *src32 = (u32 *)src;
+    u8 *dst8 = ((u8 *)dst) + num_dwords * 4;
+    u8 *src8 = ((u8 *)src) + num_dwords * 4;
+    u32 i;
+
+    for (i = 0; i < num_dwords; i++)
+        dst32[i] = src32[i];
+    for (i = 0; i < num_bytes; i++)
+        dst8[i] = src8[i];
+
+    return dst;
+}
+
+void *memset(void *ptr, u8 val, usz n) {
+    u32 num_dwords = n / 4;
+    u32 num_bytes = n % 4;
+    u32 *dst32 = (u32 *)ptr;
+    u32 *dst8 = ((u8 *)ptr) + num_dwords * 4;
+    u8 val8 = (u8)val;
+    u32 val32 = val | (val << 8) | (val << 16) | (val << 24);
+    u32 i;
+
+    for (i = 0; i < num_dwords; i++)
+        dst32[i] = val32;
+    for (i = 0; i < num_bytes; i++)
+        dst8[i] = val8;
+
+    return ptr;
+}
+
 void cpuid(u32 value, u32 *eax, u32 *ebx, u32 *ecx, u32 *edx) {
     u32 eaxres, ebxres, ecxres, edxres;
 

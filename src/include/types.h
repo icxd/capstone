@@ -23,4 +23,15 @@ typedef enum { false = 0, true = 1 } bool;
 #define WEAK __attribute__((weak))
 #define ALWAYS_INLINE __attribute__((always_inline))
 
+static inline void __assert_func(const char *file, int line, const char *func,
+                                 const char *failedexpr) {
+    s_printf("Assertion failed in %s:%d (%s): %s\n", file, line, func,
+             failedexpr);
+}
+
+#define assert(statement)                                                      \
+    ((statement)                                                               \
+         ? (void)0                                                             \
+         : __assert_func(__FILE__, __LINE__, __FUNCTION__, #statement))
+
 #endif // !TYPES_H

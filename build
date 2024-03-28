@@ -7,6 +7,7 @@ as --32 src/boot.s -o target/build/boot.o -g --gstabs
 as --32 src/lgdt.s -o target/build/lgdt.o -g --gstabs
 as --32 src/lidt.s -o target/build/lidt.o -g --gstabs
 as --32 src/lisr.s -o target/build/lisr.o -g --gstabs
+as --32 src/paging.s -o target/build/paging.o -g --gstabs
 
 C_FILES=$(find src -name "*.c")
 for file in $C_FILES; do

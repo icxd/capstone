@@ -2,11 +2,14 @@
 #include "include/idt.h"
 #include "include/isr.h"
 #include "include/kernel.h"
+#include "include/kheap.h"
 #include "include/multiboot.h"
 #include "include/pmm.h"
+#include "include/process.h"
 #include "include/serial.h"
 #include "include/types.h"
 #include "include/vga.h"
+#include "include/vmm.h"
 
 void print_eax(u32 eax) {
     u32 step_id, model, family_id, proc_type, ext_mod_id, ext_fam_id;
@@ -94,7 +97,15 @@ void kentry(usz magic, usz addr) {
     gdt_init();
     idt_init();
 
-    pmm_parse_memory_map(mbi->mmap_addr, mbi->mmap_length);
+    // pmm_parse_memory_map((multiboot_memory_map_t *)(usz)mbi->mmap_addr,
+    //                      mbi->mmap_length);
+    pmm_init(mbi);
+    vmm_init();
+    kheap_init();
+
+    pmm_test();
+    vmm_test();
+    kheap_test();
 
     // pmm_init(mbi);
     v_init(VGA_YELLOW, VGA_BLACK);
@@ -105,10 +116,38 @@ void kentry(usz magic, usz addr) {
     v_puts(utoa((u32)addr, utoa_buffer, 16));
     v_puts("\n");
 
+    u8 div_by_zero[] = {
+        0xba, 0x00, 0x00, 0x00, 0x00, // mov 0x0, edx
+        0xb8, 0xfa, 0x00, 0x00, 0x00, // mov 0xfa, eax
+        0xb9, 0x00, 0x00, 0x00, 0x00, // mov 0x0, ecx
+        0xf7, 0xf1                    // div ecx ---> DIV BY 0
+    };
+    u8 div_by_not_zero[] = {
+        0xba, 0x00, 0x00, 0x00, 0x00, // mov 0x0, edx
+        0xb8, 0xfa, 0x00, 0x00, 0x00, // mov 0xfa, eax
+        0xb9, 0x00, 0x00, 0x00, 0x01, // mov != 0x0, ecx
+        0xf7, 0xf1                    // div ecx ---> DIV BY 0
+    };
+    // movb   $0x41,0x1000
+    u8 write_A_on_1000[] = {0xc6, 0x05, 0x00, 0x10, 0x00, 0x00, 0x41};
+    u8 syscall_test[] = {0xb8, 0x02, 0x00, 0x00, 0x00, 0xcd, 0x80};
+
+    load_flat_binary_at(div_by_zero, sizeof(div_by_zero), (void *)0x1000);
+    load_flat_binary_at(div_by_not_zero, sizeof(div_by_not_zero),
+                        (void *)0x2000);
+    load_flat_binary_at(write_A_on_1000, sizeof(write_A_on_1000),
+                        (void *)0x3000);
+    load_flat_binary_at(syscall_test, sizeof(syscall_test), (void *)0x4000);
+
+    run_flat_binary((void *)0x1000);
+    run_flat_binary((void *)0x2000);
+    run_flat_binary((void *)0x3000);
+    run_flat_binary((void *)0x4000);
+
     // cpuid_test();
     s_puts("Hello, world!\n");
 
     v_puts("Hello, world!\n");
 
-    asm("int $0xe");
+    // asm("int $0xe");
 }

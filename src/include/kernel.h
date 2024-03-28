@@ -7,6 +7,8 @@ u32 strlen(const char *);
 u32 digit_count(int);
 void itoa(int, char *);
 const char *utoa(u32, char *, u8);
+void *memcpy(void *, const void *, usz);
+void *memset(void *, u8, usz);
 
 void cpuid(u32, u32 *, u32 *, u32 *, u32 *);
 
